@@ -1,12 +1,12 @@
 from rest_framework import serializers
-from .models import Profile
+from .models import Profile, Wave_Send
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = '__all__'
         
-
+        
 def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
         instance.age = validated_data.get('age', instance.age)
@@ -18,3 +18,9 @@ def update(self, instance, validated_data):
         instance.wave_buddy = validated_data.get('wave_buddy', instance.wave_buddy)
         instance.save()
         return instance
+
+
+class WaveRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Wave_Send
+        fields = '__all__'
