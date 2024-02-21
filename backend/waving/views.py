@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from profiles.models import Profile
 from .models import Wave_Send
+from block.models import Block
 from django.shortcuts import get_object_or_404
 from .serializers import WaveRequestSerializer
 from rest_framework.decorators import api_view
@@ -17,6 +18,14 @@ def send_wave(request, sender_id, receiver_id):
     except Profile.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     
+    if Block.objects.filter(sender=sender_profile, receiver=receiver_profile).exists():
+        return Response({"error": "You cannot send a wave to a blocked profile."},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    if Block.objects.filter(sender=receiver_profile, receiver=sender_profile).exists():
+        return Response({"error": "You cannot send a wave to a profile that has blocked you."},
+                        status=status.HTTP_400_BAD_REQUEST)
+
     if sender_profile == receiver_profile:
         return Response({"error": "You cannot send a wave to yourself."},
                         status=status.HTTP_400_BAD_REQUEST)
@@ -81,3 +90,11 @@ def reject_wave(request, request_id):
         
         
         return Response({"message": "Wave rejected."}, status=status.HTTP_200_OK)
+    
+@api_view(['GET'])
+def list_waves(request):
+    if request.method == 'GET':
+        wavesHang = Wave_Send.objects.all()
+        serializer = WaveRequestSerializer(wavesHang, many = True)
+        return Response({'waves': serializer.data})
+    

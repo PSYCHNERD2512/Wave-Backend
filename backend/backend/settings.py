@@ -40,7 +40,8 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'profiles.apps.ProfilesConfig',
-    'waving'
+    'waving',
+    'block'
 ]
 
 MIDDLEWARE = [
