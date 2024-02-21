@@ -3,8 +3,10 @@ from django.http import JsonResponse
 from profiles.models import Profile
 from .models import Wave_Send
 from block.models import Block
+from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from .serializers import WaveRequestSerializer
+from datetime import timedelta
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -37,7 +39,19 @@ def send_wave(request, sender_id, receiver_id):
     if Wave_Send.objects.filter(from_profile=sender_profile, to_profile=receiver_profile, status='pending').exists():
         return Response({"error": "A wave is pending with the receiver."},
                         status=status.HTTP_400_BAD_REQUEST)
-
+        
+    if Wave_Send.objects.filter(from_profile=receiver_profile, to_profile=sender_profile, status='pending').exists():
+        return Response({"error": "The receiver has already waved at you."},
+                        status=status.HTTP_400_BAD_REQUEST)
+        
+    if Wave_Send.objects.filter(from_profile=sender_profile, to_profile=receiver_profile, status='rejected').exists():
+        if (timezone.now()-Wave_Send.objects.filter(from_profile=sender_profile, to_profile=receiver_profile, status='rejected').latest('rejected_at').rejected_at) < timedelta(seconds=30):
+            
+            last_rejected_wave = Wave_Send.objects.filter(from_profile=sender_profile, to_profile=receiver_profile, status='rejected').latest('rejected_at')
+            cooldown_remaining = timedelta(seconds=30) - (timezone.now() - last_rejected_wave.rejected_at)
+            return Response({"error": "You are on cooldown for "+str(int(cooldown_remaining.total_seconds()))+" more seconds"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        
     wave_sent = Wave_Send(from_profile=sender_profile, to_profile=receiver_profile)
     wave_sent.save()
     
@@ -86,6 +100,7 @@ def reject_wave(request, request_id):
                         status=status.HTTP_400_BAD_REQUEST)
     if request.method == 'POST':
         wave_received.status = 'rejected'
+        wave_received.rejected_at=timezone.now()
         wave_received.save()
         
         
