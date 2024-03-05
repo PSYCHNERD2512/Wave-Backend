@@ -118,3 +118,59 @@ def unblock_profile(request, sender_id, receiver_id):
     except Block.DoesNotExist:
         return Response({"error": "You have not blocked this profile."},
                         status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def profile_search(request):
+    if request.method == 'GET':
+        filters = request.GET.get('filters')
+        if not filters:
+            return Response({"error": "No filters provided"}, status=status.HTTP_400_BAD_REQUEST)
+        profiles = Profile.objects.all()
+        serializer = ProfileSerializer(profiles, many=True)
+        filtered_users = [] 
+        filter_list = filters.lower().split(",")
+        filter_list.sort()
+        search_interests = filters.lower().split(",")  
+        search_interests.sort() 
+        for profile_data in serializer.data:
+            for filter in filter_list:
+                name = profile_data.get('name').lower().split(" ")  
+                if profile_data.get('name').lower() == filter.strip() or filter.strip() in name:  
+                    if profile_data not in filtered_users:
+                        filtered_users.append(profile_data)
+                        if filter in search_interests:
+                            search_interests.remove(filter)
+            
+        filtered_users_name = []
+        
+        for user in filtered_users:
+            interests = (user.get('interests')).lower()    
+            interests_list = interests.split(",")
+            interests_list.sort()
+            
+            for interest in search_interests:
+                if interest in interests_list:
+                    break
+                elif interest not in interests_list and interest == search_interests[-1]:
+                    filtered_users_name.append(user)
+                    filtered_users.remove(user)
+
+        filtered_users.extend(filtered_users_name)
+        
+        for profile_data in serializer.data:
+            interests = (profile_data.get('interests')).lower()    
+            interests_list = interests.split(",")
+            interests_list.sort()     
+            for interest in search_interests:
+                if interest not in interests_list :
+                    break
+                elif interest in interests_list :
+                    if profile_data not in filtered_users:
+                        filtered_users.append(profile_data)
+                    
+           
+        if filtered_users: 
+            return Response({"filtered users:" : filtered_users})
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
