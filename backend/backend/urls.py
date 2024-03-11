@@ -12,5 +12,7 @@ urlpatterns = [
     path('waving/', include('waving.urls')),   
     path('block_profile/<int:sender_id>/<int:receiver_id>/', views.block_profile, name='block_profile'),
     path('unblock_profile/<int:sender_id>/<int:receiver_id>/', views.unblock_profile, name='unblock_profile'),
-    path('profiles/search/', views.profile_search)
+    path('profiles/search/', views.profile_search),
+    path('api/', include('account.urls')),
 ]
+

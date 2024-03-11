@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'profiles.apps.ProfilesConfig',
     'waving',
-    'block'
+    'block',
+    'account'
 ]
 
 MIDDLEWARE = [
@@ -85,6 +86,15 @@ DATABASES = {
     }
 }
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('JWT',),
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
