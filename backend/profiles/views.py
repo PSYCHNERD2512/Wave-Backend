@@ -12,7 +12,7 @@ def profile_list(request):
     if request.method == 'GET':
         profiles = Profile.objects.all()
         serializer = ProfileSerializer(profiles, many = True)
-        return JsonResponse({'profiles': serializer.data})
+        return Response({'profiles': serializer.data})
     
     if request.method == 'POST':
         serializer = ProfileSerializer(data = request.data)
@@ -20,3 +20,18 @@ def profile_list(request):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET',  'DELETE'])
+def profile_details(request, id):
+    try:
+        profile = Profile.objects.get(pk=id)
+    except Profile.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = ProfileSerializer(profile)
+        return Response(serializer.data)
+
+    elif request.method == 'DELETE':
+        profile.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)    
