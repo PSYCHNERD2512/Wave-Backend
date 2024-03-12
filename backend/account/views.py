@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from account.models import User
 from account.serializers import UserSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
 
 @api_view(['POST'])
 def register(request):
@@ -18,7 +19,7 @@ def login(request):
     username = request.data.get('username')
     password = request.data.get('password')
 
-    user = User.objects.filter(username=username).first()
+    user = authenticate(username=username, password=password)
 
     if user is None or not user.check_password(password):
         return Response({'message': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
