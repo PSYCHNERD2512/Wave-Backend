@@ -1,10 +1,14 @@
 from rest_framework import serializers
 from .models import Profile, Wave_Send
+from django.contrib.auth import get_user_model
+
+Profile = get_user_model()
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = '__all__'
+        extra_kwargs = {'password': {'write_only': True}}
         
         
 def update(self, instance, validated_data):

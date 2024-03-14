@@ -1,17 +1,19 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
-class Profile(models.Model):
+class Profile(AbstractUser):
     name = models.CharField(max_length=50)
     age = models.IntegerField()
-    personal_quotes = models.CharField(max_length=100)
+    gender = models.CharField(max_length=50)
     interests = models.CharField(max_length=100)
-    bio = models.CharField(max_length=200)
     picture = models.CharField(max_length=100)
     residence = models.CharField(max_length=100)
     wave_buddy = models.CharField(max_length=100)
     connections = models.ManyToManyField('self', symmetrical=True, blank=True)
     sent_requests = models.ManyToManyField('self', symmetrical=False, related_name='sent_wave_requests', through='Wave_Send', through_fields=('from_profile', 'to_profile'), blank=True)
     received_requests = models.ManyToManyField('self', symmetrical=False, related_name='received_wave_requests', through='Wave_Send', through_fields=('to_profile', 'from_profile'), blank=True)
+    
+
 
     def __str__(self):
         return self.name + ' - ' + str(self.age)

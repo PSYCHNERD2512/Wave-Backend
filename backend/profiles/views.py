@@ -4,12 +4,19 @@ from .models import Profile
 from block.models import Block
 from .serializers import ProfileSerializer
 from waving.models import Wave_Send
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.decorators import api_view, renderer_classes, permission_classes, authentication_classes
+from rest_framework.renderers import JSONRenderer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 
 # Create your views here.
 @api_view(['GET', 'POST'])
+@renderer_classes((JSONRenderer,))
+@permission_classes((IsAuthenticated,))
+@authentication_classes((JWTAuthentication,))
 def profile_list(request):
     if request.method == 'GET':
         profiles = Profile.objects.all()
@@ -24,6 +31,9 @@ def profile_list(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET',  'DELETE'])
+@renderer_classes((JSONRenderer,))
+@permission_classes((IsAuthenticated,))
+@authentication_classes((JWTAuthentication,))
 def profile_details(request, id):
     try:
         profile = Profile.objects.get(pk=id)
@@ -39,6 +49,9 @@ def profile_details(request, id):
         return Response(status=status.HTTP_204_NO_CONTENT)    
     
 @api_view(['PUT'])
+@renderer_classes((JSONRenderer,))
+@permission_classes((IsAuthenticated,))
+@authentication_classes((JWTAuthentication,))
 def profile_update(request, pk):
     try:
         profile = Profile.objects.get(pk=pk)
@@ -53,6 +66,9 @@ def profile_update(request, pk):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
+@renderer_classes((JSONRenderer,))
+@permission_classes((IsAuthenticated,))
+@authentication_classes((JWTAuthentication,))
 def disconnect_user(request,current_user_id, user_id):
     try:
         current_profile = Profile.objects.get(pk=current_user_id)
@@ -76,6 +92,9 @@ def disconnect_user(request,current_user_id, user_id):
         return Response({"message": "Disconnected from the user."}, status=status.HTTP_200_OK)
     
 @api_view(['POST'])
+@renderer_classes((JSONRenderer,))
+@permission_classes((IsAuthenticated,))
+@authentication_classes((JWTAuthentication,))
 def block_profile(request, sender_id, receiver_id):
     try:
         sender_profile = Profile.objects.get(pk=sender_id)
@@ -100,6 +119,9 @@ def block_profile(request, sender_id, receiver_id):
     return Response({"message": "Profile blocked successfully."}, status=status.HTTP_201_CREATED)
 
 @api_view(['POST'])
+@renderer_classes((JSONRenderer,))
+@permission_classes((IsAuthenticated,))
+@authentication_classes((JWTAuthentication,))
 def unblock_profile(request, sender_id, receiver_id):
     try:
         sender_profile = Profile.objects.get(pk=sender_id)
@@ -121,6 +143,9 @@ def unblock_profile(request, sender_id, receiver_id):
 
 
 @api_view(['GET'])
+@renderer_classes((JSONRenderer,))
+@permission_classes((IsAuthenticated,))
+@authentication_classes((JWTAuthentication,))
 def profile_search(request):
     if request.method == 'GET':
         filters = request.GET.get('filters')
