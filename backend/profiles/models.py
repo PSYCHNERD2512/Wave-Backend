@@ -5,6 +5,7 @@ class Profile(AbstractUser):
     name = models.CharField(max_length=50)
     age = models.IntegerField()
     gender = models.CharField(max_length=50)
+    about = models.CharField(max_length=150)
     interests = models.CharField(max_length=100)
     picture = models.CharField(max_length=100)
     residence = models.CharField(max_length=100)
