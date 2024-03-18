@@ -5,15 +5,18 @@ from profiles.models import Profile
 from profiles.serializers import ProfileSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import make_password
 
 @api_view(['POST'])
 def register(request):
-    serializer = ProfileSerializer(data=request.data)
+    data = request.data.copy()
+    data['password'] = make_password(data['password'])  # Hash the password
+
+    serializer = ProfileSerializer(data=data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 # @api_view(['POST'])
 # def login(request):
 #     username = request.data.get('username')
