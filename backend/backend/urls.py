@@ -10,8 +10,8 @@ from rest_framework_simplejwt.views import (
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('profiles/', views.profile_list),
-    path('profiles/<int:id>/', views.profile_details),
-    path('profiles/<int:pk>/update/', views.profile_update, name='profile_update'),
+    path('profiles/<str:username>/', views.profile_details),
+    path('profiles/<str:username>/update/', views.profile_update, name='profile_update'),
     path('profiles/disconnect/<int:current_user_id>/<int:user_id>/', views.disconnect_user, name='disconnect_user'),
     path('waving/', include('waving.urls')),   
     path('block_profile/<int:sender_id>/<int:receiver_id>/', views.block_profile, name='block_profile'),
