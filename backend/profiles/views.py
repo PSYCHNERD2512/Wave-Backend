@@ -15,8 +15,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 # Create your views here.
 @api_view(['GET', 'POST'])
 @renderer_classes((JSONRenderer,))
-@permission_classes((IsAuthenticated,))
-@authentication_classes((JWTAuthentication,))
+# @permission_classes((IsAuthenticated,))
+# @authentication_classes((JWTAuthentication,))
 def profile_list(request):
     if request.method == 'GET':
         profiles = Profile.objects.all()
@@ -32,8 +32,8 @@ def profile_list(request):
 
 @api_view(['GET',  'DELETE'])
 @renderer_classes((JSONRenderer,))
-@permission_classes((IsAuthenticated,))
-@authentication_classes((JWTAuthentication,))
+# @permission_classes((IsAuthenticated,))
+#@authentication_classes((JWTAuthentication,))
 def profile_details(request, id):
     try:
         profile = Profile.objects.get(pk=id)
@@ -144,8 +144,8 @@ def unblock_profile(request, sender_id, receiver_id):
 
 @api_view(['GET'])
 @renderer_classes((JSONRenderer,))
-@permission_classes((IsAuthenticated,))
-@authentication_classes((JWTAuthentication,))
+# @permission_classes((IsAuthenticated,))
+# @authentication_classes((JWTAuthentication,))
 def profile_search(request):
     if request.method == 'GET':
         filters = request.GET.get('filters')

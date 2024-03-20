@@ -11,7 +11,7 @@ from django.contrib.auth.hashers import make_password
 def register(request):
     data = request.data.copy()
     data['password'] = make_password(data['password'])  # Hash the password
-
+    
     serializer = ProfileSerializer(data=data)
     if serializer.is_valid():
         serializer.save()
