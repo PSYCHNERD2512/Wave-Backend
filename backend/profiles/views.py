@@ -46,21 +46,21 @@ def profile_details(request, username):
         profile.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)    
     
-@api_view(['PUT'])
+@api_view(['PATCH'])
 @renderer_classes((JSONRenderer,))
 @permission_classes((IsAuthenticated,))
 @authentication_classes((JWTAuthentication,))
-def profile_update(request, pk):
+def profile_update(request, id):
     try:
-        profile = Profile.objects.get(pk=pk)
+        profile = Profile.objects.get(id=id)
     except Profile.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == 'PUT':
-        serializer = ProfileSerializer(profile, data=request.data)
+    if request.method == 'PATCH':
+        serializer = ProfileSerializer(profile, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
