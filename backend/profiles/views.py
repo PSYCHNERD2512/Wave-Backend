@@ -15,8 +15,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 # Create your views here.
 @api_view(['GET', 'POST'])
 @renderer_classes((JSONRenderer,))
-@permission_classes((IsAuthenticated,))
-@authentication_classes((JWTAuthentication,))
+@permission_classes([IsAuthenticated])
 def profile_list(request):
     if request.method == 'GET':
         profiles = Profile.objects.all()
@@ -32,8 +31,7 @@ def profile_list(request):
 
 @api_view(['GET',  'DELETE'])
 @renderer_classes((JSONRenderer,))
-@permission_classes((IsAuthenticated,))
-@authentication_classes((JWTAuthentication,))
+@permission_classes([IsAuthenticated])
 def profile_details(request, username):
     try:
         profile = Profile.objects.get(username=username)
