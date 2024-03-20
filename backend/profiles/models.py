@@ -1,5 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+import base64
+
+def imgtostr(image):
+    with open(image) as img:
+        encoded_str = base64.b64encode(img.read())
+        return encoded_str
 
 class Profile(AbstractUser):
     name = models.CharField(max_length=50)
@@ -7,13 +13,13 @@ class Profile(AbstractUser):
     gender = models.CharField(max_length=50)
     about = models.CharField(max_length=150)
     interests = models.CharField(max_length=100)
-    picture = models.CharField(max_length=100)
+    picture = models.CharField(max_length=100000)
     residence = models.CharField(max_length=100)
     wave_buddy = models.CharField(max_length=100)
     connections = models.ManyToManyField('self', symmetrical=True, blank=True)
     sent_requests = models.ManyToManyField('self', symmetrical=False, related_name='sent_wave_requests', through='Wave_Send', through_fields=('from_profile', 'to_profile'), blank=True)
     received_requests = models.ManyToManyField('self', symmetrical=False, related_name='received_wave_requests', through='Wave_Send', through_fields=('to_profile', 'from_profile'), blank=True)
-    
+
 
 
     def __str__(self):
