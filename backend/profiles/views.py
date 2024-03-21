@@ -55,9 +55,9 @@ def profile_details(request, username):
 @api_view(["PATCH"])
 @renderer_classes((JSONRenderer,))
 @permission_classes((IsAuthenticated,))
-def profile_update(request, id):
+def profile_update(request, username):
     try:
-        profile = Profile.objects.get(id=id)
+        profile = Profile.objects.get(username=username)
     except Profile.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
