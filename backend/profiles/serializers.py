@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 Profile = get_user_model()
 
 class ProfileSerializer(serializers.ModelSerializer):
-    connections = serializers.PrimaryKeyRelatedField(many=True)
+    connections = serializers.PrimaryKeyRelatedField(many=True,queryset=Profile.objects.all())
     sent_waves = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     received_waves = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     class Meta:
