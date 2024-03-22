@@ -5,23 +5,13 @@ from django.contrib.auth import get_user_model
 Profile = get_user_model()
 
 class ProfileSerializer(serializers.ModelSerializer):
-    connections = serializers.SerializerMethodField()
-    sent_waves = serializers.SerializerMethodField()
-    received_waves = serializers.SerializerMethodField()
-
+    connections = serializers.PrimaryKeyRelatedField(many=True)
+    sent_waves = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    received_waves = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     class Meta:
         model = Profile
         fields = '__all__'
         extra_kwargs = {'password': {'write_only': True}}
-
-    def get_connections_usernames(self, obj):
-        return [connection.username for connection in obj.connections.all()]
-
-    def get_sent_waves_usernames(self, obj):
-        return [wave.from_profile.username for wave in obj.sent_waves.all()]
-
-    def get_received_waves_usernames(self, obj):
-        return [wave.to_profile.username for wave in obj.received_waves.all()]
         
         
 def update(self, instance, validated_data):
