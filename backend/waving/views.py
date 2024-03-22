@@ -37,12 +37,22 @@ def send_wave(request, sender_id, receiver_id):
                         status=status.HTTP_400_BAD_REQUEST)
         
     if Wave_Send.objects.filter(from_profile=sender_profile, to_profile=receiver_profile, status='pending').exists():
-        return Response({"error": "A wave is pending with the receiver."},
+        return Response({"error": "You have already waved at this user."},
                         status=status.HTTP_400_BAD_REQUEST)
         
     if Wave_Send.objects.filter(from_profile=receiver_profile, to_profile=sender_profile, status='pending').exists():
-        return Response({"error": "The receiver has already waved at you."},
-                        status=status.HTTP_400_BAD_REQUEST)
+        wave_received = Wave_Send.objects.get(from_profile=receiver_profile, to_profile=sender_profile, status='pending')
+        wave_received.status = 'accepted'
+        wave_received.save()
+        
+        sender_profile.connections.add(receiver_profile)
+        receiver_profile.connections.add(sender_profile)
+        
+        Wave_Send.objects.filter(from_profile=receiver_profile, to_profile=sender_profile).delete()
+        Wave_Send.objects.filter(from_profile=sender_profile, to_profile=receiver_profile).delete()
+        
+        return Response({"message": "Wave accepted."}, status=status.HTTP_200_OK)
+
         
     if Wave_Send.objects.filter(from_profile=sender_profile, to_profile=receiver_profile, status='rejected').exists():
         if (timezone.now()-Wave_Send.objects.filter(from_profile=sender_profile, to_profile=receiver_profile, status='rejected').latest('rejected_at').rejected_at) < timedelta(seconds=30):
@@ -61,50 +71,50 @@ def send_wave(request, sender_id, receiver_id):
     return Response({"message": "Wave sent successfully. Wave id is " + str(wave_sent.id)},
                     status=status.HTTP_201_CREATED)
 
-@api_view(['POST'])
-def accept_wave(request, request_id):
-    try:
-        wave_received = get_object_or_404(Wave_Send, pk=request_id)
-    except Wave_Send.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    if wave_received.status == 'accepted':
-        return Response({"error": "Wave already accepted."},
-                        status=status.HTTP_400_BAD_REQUEST)
-    if wave_received.status == 'rejected':
-        return Response({"error": "Wave already rejected."},
-                        status=status.HTTP_400_BAD_REQUEST)
-    if request.method == 'POST':
-        wave_received.status = 'accepted'
-        wave_received.save()
-        
-        sender_profile = wave_received.from_profile
-        receiver_profile = wave_received.to_profile
-        
-        sender_profile.connections.add(receiver_profile)
-        receiver_profile.connections.add(sender_profile)
-        
-        return Response({"message": "Wave accepted."}, status=status.HTTP_200_OK)
+# @api_view(['POST'])
+# def accept_wave(request, request_id):
+#     try:
+#         wave_received = get_object_or_404(Wave_Send, pk=request_id)
+#     except Wave_Send.DoesNotExist:
+#         return Response(status=status.HTTP_404_NOT_FOUND)
+#     if wave_received.status == 'accepted':
+#         return Response({"error": "Wave already accepted."},
+#                         status=status.HTTP_400_BAD_REQUEST)
+#     if wave_received.status == 'rejected':
+#         return Response({"error": "Wave already rejected."},
+#                         status=status.HTTP_400_BAD_REQUEST)
+#     if request.method == 'POST':
+#         wave_received.status = 'accepted'
+#         wave_received.save()
+#         
+#         sender_profile = wave_received.from_profile
+#         receiver_profile = wave_received.to_profile
+#         
+#        sender_profile.connections.add(receiver_profile)
+#        receiver_profile.connections.add(sender_profile)
+#         
+#         return Response({"message": "Wave accepted."}, status=status.HTTP_200_OK)
 
 
-@api_view(['POST'])
-def reject_wave(request, request_id):
-    try:
-        wave_received = get_object_or_404(Wave_Send, pk=request_id)
-    except Wave_Send.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    if wave_received.status == 'accepted':
-        return Response({"error": "Wave already accepted."},
-                        status=status.HTTP_400_BAD_REQUEST)
-    if wave_received.status == 'rejected':
-        return Response({"error": "Wave already rejected."},
-                        status=status.HTTP_400_BAD_REQUEST)
-    if request.method == 'POST':
-        wave_received.status = 'rejected'
-        wave_received.rejected_at=timezone.now()
-        wave_received.save()
-        
-        
-        return Response({"message": "Wave rejected."}, status=status.HTTP_200_OK)
+# @api_view(['POST'])
+# def reject_wave(request, request_id):
+#     try:
+#         wave_received = get_object_or_404(Wave_Send, pk=request_id)
+#     except Wave_Send.DoesNotExist:
+#         return Response(status=status.HTTP_404_NOT_FOUND)
+#     if wave_received.status == 'accepted':
+#         return Response({"error": "Wave already accepted."},
+#                         status=status.HTTP_400_BAD_REQUEST)
+#     if wave_received.status == 'rejected':
+#         return Response({"error": "Wave already rejected."},
+#                         status=status.HTTP_400_BAD_REQUEST)
+#     if request.method == 'POST':
+#         wave_received.status = 'rejected'
+#         wave_received.rejected_at=timezone.now()
+#         wave_received.save()
+#         
+#         
+#         return Response({"message": "Wave rejected."}, status=status.HTTP_200_OK)
     
 @api_view(['GET'])
 def list_waves(request):
